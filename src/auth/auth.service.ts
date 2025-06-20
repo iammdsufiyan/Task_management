@@ -2,17 +2,22 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
 import { AuthCredentialDto } from './dto/auth-credentials.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { promises } from 'dns';
+import { jwtPayload } from './jwt-payload.inetrface';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    private jwtService: JwtService,
   ) {}
 
   //   async createUser(authCredentialDto:AuthCredentialDto):Promise<void>{
@@ -45,6 +50,23 @@ export class AuthService {
       } else {
         throw new InternalServerErrorException('Something went wrong');
       }
+    }
+  }
+
+  async signIn(
+    authCredentialDto: AuthCredentialDto,
+  ): Promise<{ accessToken: string }> {
+    const { username, password } = authCredentialDto;
+    const user = await this.userRepository.findOne({
+      where: { username },
+    });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const payload: jwtPayload = { username };
+      const accessToken: string = await this.jwtService.sign(payload);
+      console.log(accessToken);
+      return { accessToken };
+    } else {
+      throw new UnauthorizedException('please check your login credential ');
     }
   }
 }
