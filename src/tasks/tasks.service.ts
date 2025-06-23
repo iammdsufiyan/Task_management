@@ -5,6 +5,8 @@ import { CreateTaskDto } from 'src/dto/create-task.dto';
 import { TaskStatus } from './task-status-enum';
 import { Repository } from 'typeorm';
 import { UserEntity } from 'src/auth/user.entity';
+import { promises } from 'dns';
+import { GetTasksFilterDto } from 'src/dto/get-tasks-filter.dto';
 @Injectable()
 export class TasksService {
   constructor(
@@ -32,6 +34,36 @@ export class TasksService {
   //   }
   //   return found;
   // }
+  // async getAllTask(): Promise<Task[]> {
+  //   const found = await this.taskRepository.find();
+  //   if (!found) {
+  //     throw new NotFoundException('no task is created yet ');
+  //   }
+  //   return found;
+  // }
+  // tasks.service.ts
+  async getAllTask(
+    filterDto: GetTasksFilterDto,
+    user: UserEntity,
+  ): Promise<Task[]> {
+    const { status, search } = filterDto;
+    const query = this.taskRepository.createQueryBuilder('task');
+    query.where({ user });
+    if (status) {
+      query.andWhere('task.status = :status', { status });
+    }
+    if (search) {
+      query.andWhere(
+        '(LOWER(task.title) LIKE LOWER(:search) OR LOWER(task.description) LIKE LOWER(:search))',
+        { search: `%${search}%` },
+      );
+    }
+    const tasks = await query.getMany();
+    if (!tasks || tasks.length === 0) {
+      throw new NotFoundException('No tasks found for this user');
+    }
+    return tasks;
+  }
 
   // getTaskswithFilters(filterDto: GetTasksFilterDto): Task[] {
   //   const { status, search } = filterDto;
