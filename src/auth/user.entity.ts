@@ -6,13 +6,12 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({unique:true})
+  @Column({ unique: true })
   username: string;
 
   @Column()
   password: string;
 
- @OneToMany(() => Task, task => task.user, { eager: true })
-tasks: Task[];
-
+  @OneToMany(() => Task, (task) => task.user, { eager: true })
+  tasks: Task[];
 }
