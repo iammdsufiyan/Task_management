@@ -4,6 +4,7 @@ import { Task } from './task.entity';
 import { CreateTaskDto } from 'src/dto/create-task.dto';
 import { TaskStatus } from './task-status-enum';
 import { Repository } from 'typeorm';
+import { UserEntity } from 'src/auth/user.entity';
 @Injectable()
 export class TasksService {
   constructor(
@@ -50,13 +51,14 @@ export class TasksService {
   //   }
   //   return tasks;
   // }
-  async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
+  async createTask(createTaskDto: CreateTaskDto,user:UserEntity): Promise<Task> {
     const { title, description } = createTaskDto;
 
     const task = this.taskRepository.create({
       title,
       description,
       status: TaskStatus.OPEN,
+      user,
     });
     await this.taskRepository.save(task);
     return task;
