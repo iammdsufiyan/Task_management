@@ -5,7 +5,6 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    
     TasksModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
