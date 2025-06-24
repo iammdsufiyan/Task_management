@@ -8,6 +8,7 @@ import {
   Patch,
   UseGuards,
   Query,
+  Logger,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task } from './task.entity';
@@ -20,6 +21,7 @@ import { GetTasksFilterDto } from 'src/dto/get-tasks-filter.dto';
 @Controller('tasks')
 @UseGuards(AuthGuard('jwt'))
 export class TasksController {
+  private logger = new Logger('TaskController');
   constructor(private tasksService: TasksService) {}
 
   //   @Get()
@@ -35,13 +37,20 @@ export class TasksController {
     @Query() filterDto: GetTasksFilterDto,
     @GetUser() user: UserEntity,
   ): Promise<Task[]> {
+    this.logger.verbose(
+      `User "${user.username}" retrieving all tasks. Filters: ${JSON.stringify(
+        filterDto,
+      )}`,
+    );
     return this.tasksService.getAllTask(filterDto, user);
   }
 
   @Get('/:id')
-  getTaskByid(@Param('id') id: string ,
-     @GetUser ()user:UserEntity): Promise<Task> {
-    return this.tasksService.getTaskByid(id,user);
+  getTaskByid(
+    @Param('id') id: string,
+    @GetUser() user: UserEntity,
+  ): Promise<Task> {
+    return this.tasksService.getTaskByid(id, user);
   }
   //   @Get('/:id')
   //   getTaskByid(@Param('id') id: string): Task {
@@ -50,10 +59,15 @@ export class TasksController {
 
   @Post()
   createTask(
-    @Body() CreateTaskDto: CreateTaskDto,
+    @Body() createTaskDto: CreateTaskDto,
     @GetUser() user: UserEntity,
   ): Promise<Task> {
-    return this.tasksService.createTask(CreateTaskDto, user);
+    this.logger.verbose(
+      `User "${user.username}" creating a new task. Data: ${JSON.stringify(
+        createTaskDto,
+      )}`,
+    );
+    return this.tasksService.createTask(createTaskDto, user);
   }
   //   @Post()
   //   createTask(@Body() createTaskDto: CreateTaskDto): Task {
@@ -61,10 +75,11 @@ export class TasksController {
   //   }
 
   @Delete('/:id')
-  deleteTask(@Param('id') id: string,
-  @GetUser()user:UserEntity
-): Promise<void> {
-    return this.tasksService.deleteTask(id,user);
+  deleteTask(
+    @Param('id') id: string,
+    @GetUser() user: UserEntity,
+  ): Promise<void> {
+    return this.tasksService.deleteTask(id, user);
   }
 
   //   @Delete('/:id')
@@ -76,10 +91,10 @@ export class TasksController {
   updateTaskStatus(
     @Param('id') id: string,
     @Body() updatedTaskStatusDto: UpdatedTaskStatusDto,
-    @GetUser()user:UserEntity,
+    @GetUser() user: UserEntity,
   ): Promise<Task> {
     const { status } = updatedTaskStatusDto;
-    return this.tasksService.updateTaskStatus(id, status,user);
+    return this.tasksService.updateTaskStatus(id, status, user);
   }
 
   //   @Patch('/:id/status')

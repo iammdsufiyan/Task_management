@@ -8,3 +8,17 @@ export const GetUser = createParamDecorator(
     return req.user;
   },
 );
+
+
+// @GetUser('id') userId: string
+
+
+
+// export const GetUser = createParamDecorator(
+//   (data: keyof UserEntity, ctx: ExecutionContext) => {
+//     const req = ctx.switchToHttp().getRequest();
+//     const user = req.user;
+//     return data ? user?.[data] : user;
+//   },
+// );
+
