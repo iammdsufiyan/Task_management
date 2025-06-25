@@ -17,7 +17,10 @@ export class Task {
   @Column()
   status: TaskStatus;
 
+  @Column({ nullable: true })
+  image: string;
+
   @ManyToOne(() => UserEntity, (user) => user.tasks, { eager: false })
-  @Exclude({toPlainOnly:true})
+  @Exclude({ toPlainOnly: true })
   user: UserEntity;
 }
